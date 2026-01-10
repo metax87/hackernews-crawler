@@ -8,10 +8,11 @@ Hacker News 爬虫项目，用于抓取热门故事并筛选出 AI 相关内容�
 
 **技术栈**:
 - Python 3.9+
-- httpx（HTTP 请求，支持异步）
+- FastAPI（Web 框架）
+- SQLAlchemy 2.0（异步 ORM）
+- httpx（HTTP 请求）
 - pydantic-settings（配置管理）
-- tenacity（重试机制）
-- Hacker News Firebase API
+- SQLite/PostgreSQL（数据库）
 
 ## 核心命令
 
@@ -19,18 +20,27 @@ Hacker News 爬虫项目，用于抓取热门故事并筛选出 AI 相关内容�
 # 安装依赖
 python3 -m pip install -r requirements.txt
 
-# 运行爬虫
+# 运行爬虫（保存到数据库）
 python3 -m app.services.crawler
+
+# 启动 API 服务器
+python3 -m uvicorn app.main:app --reload
+# 访问 http://localhost:8000/docs 查看 API 文档
 ```
 
 ## 代码架构
 
 ```
 app/
-├── config.py           # 配置管理（读取 .env）
-├── services/
-│   └── crawler.py      # 爬虫核心逻辑
-└── api/                # API 路由（阶段 3）
+├── main.py             # FastAPI 应用入口
+├── config.py           # 配置管理
+├── database.py         # 数据库连接
+├── models.py           # SQLAlchemy 数据模型
+├── schemas.py          # Pydantic 验证模型
+├── api/
+│   └── stories.py      # Stories API 路由
+└── services/
+    └── crawler.py      # 爬虫服务
 ```
 
 **核心类 `HNScraper`** (`app/services/crawler.py`):
@@ -146,7 +156,61 @@ sqlite3 data/hackernews.db "SELECT * FROM stories;"
 
 ---
 
-### 阶段 3：FastAPI 接口 ⏳
+### 阶段 3：FastAPI 接口 ✅
+
+**完成时间**: 2026-01-10
+
+**新增文件**:
+| 文件 | 说明 |
+|------|------|
+| `app/main.py` | FastAPI 应用入口 |
+| `app/api/stories.py` | Stories API 路由 |
+
+**API 端点**:
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/` | 根路径信息 |
+| GET | `/health` | 健康检查 |
+| GET | `/docs` | API 文档（自动生成）|
+| GET | `/api/stories` | 获取故事列表（分页）|
+| GET | `/api/stories/{id}` | 获取单个故事 |
+| GET | `/api/stats` | 获取统计信息 |
+| POST | `/api/crawl` | 手动触发爬取 |
+
+**查询参数**（GET /api/stories）:
+- `page` - 页码（默认 1）
+- `size` - 每页数量（默认 20，最大 100）
+- `ai_only` - 只返回 AI 相关（默认 true）
+- `min_score` - 最低分数筛选
+
+**核心功能**:
+- ✅ RESTful API 设计
+- ✅ 自动 API 文档（Swagger UI）
+- ✅ 分页查询
+- ✅ 数据筛选（分数、AI 分类）
+- ✅ CORS 支持（允许前端跨域）
+- ✅ 统计接口
+
+**技术学习点**:
+- `FastAPI`：现代 Python Web 框架
+- 自动文档生成：基于 OpenAPI 规范
+- 依赖注入：数据库会话管理
+- 异步路由：async/await 异步处理
+- Pydantic 验证：自动请求/响应验证
+
+**运行命令**:
+```bash
+# 启动 API 服务器
+python3 -m uvicorn app.main:app --reload
+
+# 或者
+python3 -m app.main
+
+# 访问 API 文档
+open http://localhost:8000/docs
+```
+
+---
 
 ### 阶段 4：Docker 化 ⏳
 
