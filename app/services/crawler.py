@@ -7,10 +7,12 @@ Hacker News 爬虫服务
 3. 添加重试机制（tenacity）
 4. 结构化日志
 5. 启用 SSL 验证
+6. 数据库持久化（阶段 2）
 """
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
@@ -18,9 +20,13 @@ from datetime import datetime
 from typing import Optional
 
 import httpx
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from app.config import settings
+from app.database import AsyncSessionLocal
+from app.models import Story
 
 # 配置日志
 logging.basicConfig(
@@ -139,8 +145,53 @@ def save_to_json(data: list[dict], filename: str | None = None) -> str:
     return filepath
 
 
+async def save_to_database(stories: list[dict]) -> tuple[int, int]:
+    """
+    保存故事到数据库
+
+    返回：(新增数量, 更新数量)
+    """
+    added = 0
+    updated = 0
+
+    async with AsyncSessionLocal() as session:
+        for story_data in stories:
+            # 检查是否已存在
+            stmt = select(Story).where(Story.hn_id == story_data["hn_id"])
+            result = await session.execute(stmt)
+            existing_story = result.scalar_one_or_none()
+
+            if existing_story:
+                # 更新现有记录（分数和评论数可能变化）
+                existing_story.score = story_data["score"]
+                existing_story.comments_count = story_data["comments_count"]
+                updated += 1
+                logger.debug(f"更新故事: {story_data['hn_id']}")
+            else:
+                # 创建新记录
+                story = Story(
+                    hn_id=story_data["hn_id"],
+                    title=story_data["title"],
+                    url=story_data.get("url"),
+                    author=story_data["author"],
+                    score=story_data["score"],
+                    comments_count=story_data["comments_count"],
+                    posted_at=datetime.fromtimestamp(story_data["posted_at"]),
+                    is_ai_related=True,  # 已筛选过的都是 AI 相关
+                    hn_url=story_data["hn_url"],
+                )
+                session.add(story)
+                added += 1
+                logger.debug(f"新增故事: {story_data['hn_id']}")
+
+        await session.commit()
+
+    logger.info(f"数据库保存完成: 新增 {added} 条, 更新 {updated} 条")
+    return added, updated
+
+
 def run_crawler():
-    """运行爬虫的入口函数"""
+    """运行爬虫的入口函数（同步版本，仅保存 JSON）"""
     with HNScraper() as scraper:
         stories = scraper.crawl()
         save_to_json(stories)
@@ -154,5 +205,28 @@ def run_crawler():
             print(f"  ... 还有 {len(stories) - 5} 条")
 
 
+async def run_crawler_async():
+    """运行爬虫的入口函数（异步版本，保存到数据库）"""
+    with HNScraper() as scraper:
+        stories = scraper.crawl()
+
+        # 保存到数据库
+        added, updated = await save_to_database(stories)
+
+        # 也保存 JSON 备份
+        save_to_json(stories)
+
+        # 显示结果
+        print(f"\n找到 {len(stories)} 个 AI 相关故事：")
+        print(f"数据库: 新增 {added} 条, 更新 {updated} 条")
+        print("\n最新故事:")
+        for story in stories[:5]:
+            print(f"  - {story['title']} (score: {story['score']})")
+
+        if len(stories) > 5:
+            print(f"  ... 还有 {len(stories) - 5} 条")
+
+
 if __name__ == "__main__":
-    run_crawler()
+    # 使用异步版本
+    asyncio.run(run_crawler_async())

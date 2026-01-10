@@ -93,7 +93,58 @@ app/
 - `tenacity`：灵活的重试装饰器
 - Python 模块化：`__init__.py` 和包结构
 
-### 阶段 2：PostgreSQL 集成 ⏳
+---
+
+### 阶段 2：数据库集成 ✅
+
+**完成时间**: 2026-01-10
+
+**新增文件**:
+| 文件 | 说明 |
+|------|------|
+| `app/database.py` | SQLAlchemy 异步引擎配置 |
+| `app/models.py` | Story 数据模型（ORM） |
+| `app/schemas.py` | Pydantic 数据验证模型 |
+| `alembic/` | 数据库迁移管理 |
+
+**数据模型设计**:
+```python
+class Story:
+    id              # 主键
+    hn_id           # HN ID（唯一索引）
+    title, url      # 基本信息
+    score, comments_count  # 统计
+    posted_at       # HN 发布时间
+    created_at, updated_at  # 入库/更新时间
+    is_ai_related   # 分类标记（索引）
+```
+
+**核心功能**:
+- ✅ SQLite 本地存储（默认）
+- ✅ 数据去重（hn_id 唯一约束）
+- ✅ 自动更新（分数、评论数）
+- ✅ Alembic 迁移管理
+- ✅ 异步数据库操作
+
+**技术学习点**:
+- `SQLAlchemy 2.0`：异步 ORM，类型安全的 Mapped
+- `Alembic`：数据库版本控制
+- `asyncio`：Python 异步编程
+- 数据库索引设计：复合索引优化查询
+
+**数据库命令**:
+```bash
+# 创建迁移
+python3 -m alembic revision --autogenerate -m "描述"
+
+# 执行迁移
+python3 -m alembic upgrade head
+
+# 查询数据
+sqlite3 data/hackernews.db "SELECT * FROM stories;"
+```
+
+---
 
 ### 阶段 3：FastAPI 接口 ⏳
 

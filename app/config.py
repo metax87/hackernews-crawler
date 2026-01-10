@@ -25,8 +25,10 @@ class Settings(BaseSettings):
     # 日志级别
     log_level: str = "INFO"
 
-    # 数据库（阶段 2 使用）
-    database_url: str = ""
+    # 数据库配置
+    database_url: str = "sqlite+aiosqlite:///./data/hackernews.db"  # 异步 URL（应用使用）
+    sync_database_url: str = "sqlite:///./data/hackernews.db"  # 同步 URL（Alembic 使用）
+    db_echo: bool = False  # 是否打印 SQL 语句
 
     model_config = SettingsConfigDict(
         env_file=".env",
