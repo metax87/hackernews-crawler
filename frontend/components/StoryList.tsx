@@ -283,7 +283,7 @@ export default function StoryList() {
                     step={10}
                     value={minScore}
                     onChange={setMinScore}
-                    onAfterChange={handleScoreFilter}
+                    onChangeComplete={handleScoreFilter}
                     marks={{
                       0: '0',
                       100: '100',
