@@ -300,20 +300,22 @@ export default function StoryList() {
       </Card>
 
       {/* 故事列表 */}
-      <Table<Story>
-        columns={columns}
-        dataSource={stories}
-        loading={loading}
-        rowKey="id"
-        pagination={{
-          ...pagination,
-          onChange: (page, pageSize) => {
-            loadStories(page, pageSize);
-          },
-          showSizeChanger: true,
-          showTotal: (total) => `共 ${total} 条`,
-        }}
-      />
+      <Card>
+        <Table<Story>
+          columns={columns}
+          dataSource={stories}
+          loading={loading}
+          rowKey="id"
+          pagination={{
+            ...pagination,
+            onChange: (page, pageSize) => {
+              loadStories(page, pageSize);
+            },
+            showSizeChanger: true,
+            showTotal: (total) => `共 ${total} 条`,
+          }}
+        />
+      </Card>
     </div>
   );
 }
