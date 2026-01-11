@@ -59,11 +59,11 @@ export default function StoryList() {
             href={record.url || record.hn_url}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ fontSize: 16, fontWeight: 500, color: '#1890ff' }}
+            style={{ fontSize: 16, fontWeight: 500 }}
           >
             {text}
           </a>
-          <div style={{ marginTop: 8, fontSize: 13, color: '#8c8c8c' }}>
+          <div style={{ marginTop: 8, fontSize: 13, opacity: 0.65 }}>
             <Space size="large" wrap>
               <span>
                 <ClockCircleOutlined /> {formatTime(record.posted_at)}
