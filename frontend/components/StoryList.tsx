@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import {
-  List,
+  Table,
   Card,
   Tag,
   Space,
@@ -15,7 +15,9 @@ import {
   Input,
   Select,
   Slider,
+  Typography,
 } from 'antd';
+import type { TableProps } from 'antd';
 import {
   FireOutlined,
   CommentOutlined,
@@ -27,6 +29,7 @@ import {
 import { fetchStories, fetchStats, triggerCrawl, type Story, type StatsResponse } from '@/lib/api';
 
 const { Search } = Input;
+const { Link } = Typography;
 
 export default function StoryList() {
   const [stories, setStories] = useState<Story[]>([]);
@@ -41,6 +44,65 @@ export default function StoryList() {
     pageSize: 20,
     total: 0,
   });
+
+  // Table 列定义
+  const columns: TableProps<Story>['columns'] = [
+    {
+      title: '标题',
+      dataIndex: 'title',
+      key: 'title',
+      width: '50%',
+      render: (text, record) => (
+        <div>
+          <a
+            href={record.url || record.hn_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ fontSize: 16, fontWeight: 500, color: '#1890ff' }}
+          >
+            {text}
+          </a>
+          <div style={{ marginTop: 8, fontSize: 13, color: '#8c8c8c' }}>
+            <Space size="large" wrap>
+              <span>
+                <ClockCircleOutlined /> {formatTime(record.posted_at)}
+              </span>
+              <span>作者: {record.author}</span>
+              <a href={record.hn_url} target="_blank" rel="noopener noreferrer">
+                HN 讨论
+              </a>
+            </Space>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: '分数',
+      dataIndex: 'score',
+      key: 'score',
+      width: 100,
+      align: 'center',
+      sorter: (a, b) => a.score - b.score,
+      render: (score) => (
+        <Tag color="volcano" icon={<FireOutlined />} style={{ fontSize: 14 }}>
+          {score}
+        </Tag>
+      ),
+    },
+    {
+      title: '评论',
+      dataIndex: 'comments_count',
+      key: 'comments_count',
+      width: 100,
+      align: 'center',
+      sorter: (a, b) => a.comments_count - b.comments_count,
+      render: (count) => (
+        <Tag icon={<CommentOutlined />} style={{ fontSize: 14 }}>
+          {count}
+        </Tag>
+      ),
+    },
+  ];
 
   // 加载故事列表
   const loadStories = async (page = 1, pageSize = 20, search = searchText, scoreFilter = minScore) => {
@@ -237,58 +299,21 @@ export default function StoryList() {
       </Card>
 
       {/* 故事列表 */}
-      <Spin spinning={loading}>
-        <List
-          itemLayout="vertical"
-          size="large"
-          pagination={{
-            ...pagination,
-            onChange: (page, pageSize) => {
-              loadStories(page, pageSize);
-            },
-            showSizeChanger: true,
-            showTotal: (total) => `共 ${total} 条`,
-          }}
-          dataSource={stories}
-          renderItem={(story) => (
-            <List.Item
-              key={story.id}
-              extra={
-                <Space vertical align="end">
-                  <Tag color="volcano" icon={<FireOutlined />}>
-                    {story.score}
-                  </Tag>
-                  <Tag icon={<CommentOutlined />}>{story.comments_count}</Tag>
-                </Space>
-              }
-            >
-              <List.Item.Meta
-                title={
-                  <a
-                    href={story.url || story.hn_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ fontSize: 18, fontWeight: 500 }}
-                  >
-                    {story.title}
-                  </a>
-                }
-                description={
-                  <Space size="large" wrap>
-                    <span>
-                      <ClockCircleOutlined /> {formatTime(story.posted_at)}
-                    </span>
-                    <span>作者：{story.author}</span>
-                    <a href={story.hn_url} target="_blank" rel="noopener noreferrer">
-                      HN 讨论
-                    </a>
-                  </Space>
-                }
-              />
-            </List.Item>
-          )}
-        />
-      </Spin>
+      <Table<Story>
+        columns={columns}
+        dataSource={stories}
+        loading={loading}
+        rowKey="id"
+        pagination={{
+          ...pagination,
+          onChange: (page, pageSize) => {
+            loadStories(page, pageSize);
+          },
+          showSizeChanger: true,
+          showTotal: (total) => `共 ${total} 条`,
+          position: ['bottomCenter'],
+        }}
+      />
     </div>
   );
 }
