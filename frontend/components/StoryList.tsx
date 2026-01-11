@@ -271,7 +271,7 @@ export default function StoryList() {
           </Space>
 
           {showFilters && (
-            <Card size="small" style={{ background: '#fafafa' }}>
+            <Card size="small">
               <Space vertical style={{ width: '100%' }}>
                 <div>
                   <div style={{ marginBottom: 8 }}>
