@@ -1,6 +1,6 @@
 'use client';
 
-import { ConfigProvider, theme } from 'antd';
+import { ConfigProvider, theme, App } from 'antd';
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 type ThemeMode = 'light' | 'dark';
@@ -49,15 +49,17 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           },
         }}
       >
-        <div
-          style={{
-            minHeight: '100vh',
-            background: themeMode === 'dark' ? '#141414' : '#f5f5f5',
-            transition: 'background 0.3s',
-          }}
-        >
-          {children}
-        </div>
+        <App>
+          <div
+            style={{
+              minHeight: '100vh',
+              background: themeMode === 'dark' ? '#141414' : '#f5f5f5',
+              transition: 'background 0.3s',
+            }}
+          >
+            {children}
+          </div>
+        </App>
       </ConfigProvider>
     </ThemeContext.Provider>
   );

@@ -177,7 +177,7 @@ export default function StoryList() {
 
       {/* 搜索和筛选 */}
       <Card style={{ marginBottom: 24 }}>
-        <Space direction="vertical" style={{ width: '100%' }} size="large">
+        <Space vertical style={{ width: '100%' }} size="large">
           <Search
             placeholder="搜索标题或作者..."
             allowClear
@@ -209,7 +209,7 @@ export default function StoryList() {
 
           {showFilters && (
             <Card size="small" style={{ background: '#fafafa' }}>
-              <Space direction="vertical" style={{ width: '100%' }}>
+              <Space vertical style={{ width: '100%' }}>
                 <div>
                   <div style={{ marginBottom: 8 }}>
                     <FireOutlined /> 最低分数: {minScore}
@@ -254,7 +254,7 @@ export default function StoryList() {
             <List.Item
               key={story.id}
               extra={
-                <Space direction="vertical" align="end">
+                <Space vertical align="end">
                   <Tag color="volcano" icon={<FireOutlined />}>
                     {story.score}
                   </Tag>
