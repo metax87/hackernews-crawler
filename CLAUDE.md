@@ -16,6 +16,8 @@ Hacker News 爬虫项目，用于抓取热门故事并筛选出 AI 相关内容�
 
 ## 核心命令
 
+### 后端
+
 ```bash
 # 安装依赖
 python3 -m pip install -r requirements.txt
@@ -26,6 +28,22 @@ python3 -m app.services.crawler
 # 启动 API 服务器
 python3 -m uvicorn app.main:app --reload
 # 访问 http://localhost:8000/docs 查看 API 文档
+```
+
+### 前端
+
+```bash
+cd frontend
+
+# 安装依赖
+npm install
+
+# 配置环境变量
+cp .env.example .env.local
+
+# 启动开发服务器
+npm run dev
+# 访问 http://localhost:3000
 ```
 
 ## 代码架构
