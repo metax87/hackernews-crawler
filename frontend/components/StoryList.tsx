@@ -10,7 +10,7 @@ import {
   Row,
   Col,
   Button,
-  message,
+  App,
   Spin,
   Input,
   Select,
@@ -32,6 +32,7 @@ const { Search } = Input;
 const { Link } = Typography;
 
 export default function StoryList() {
+  const { message } = App.useApp();
   const [stories, setStories] = useState<Story[]>([]);
   const [stats, setStats] = useState<StatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
