@@ -311,7 +311,6 @@ export default function StoryList() {
           },
           showSizeChanger: true,
           showTotal: (total) => `共 ${total} 条`,
-          position: ['bottomCenter'],
         }}
       />
     </div>
